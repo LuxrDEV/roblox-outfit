@@ -1,0 +1,18 @@
+{
+  "name": "roblox-outfit-creator",
+  "version": "3.0.0",
+  "description": "Roblox Outfit Creator — Groq AI + PostgreSQL",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "pg": "^8.11.3",
+    "groq-sdk": "^0.3.3"
+  }
+}

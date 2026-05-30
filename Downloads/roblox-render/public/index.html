@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roblox Outfit Creator</title>
+<style>
+:root{
+  --bg:#0d0d10;--s1:#141418;--s2:#1c1c22;--s3:#242429;
+  --border:#2a2a32;--accent:#7c5cfc;--accent2:#a78bfa;
+  --text:#e8e8f0;--muted:#707088;--green:#22c55e;--red:#ef4444;
+  --amber:#f59e0b;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'Segoe UI',system-ui,sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+
+/* HEADER */
+header{background:var(--s1);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;gap:10px;flex-shrink:0}
+.logo{width:32px;height:32px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+header h1{font-size:16px;font-weight:600}
+header p{font-size:11px;color:#555;margin-top:1px}
+.hbadge{margin-left:auto;background:rgba(124,92,252,0.15);color:var(--accent2);border:1px solid rgba(124,92,252,0.25);padding:3px 10px;border-radius:20px;font-size:11px;cursor:pointer;transition:all 0.2s;flex-shrink:0}
+.hbadge:hover{background:rgba(124,92,252,0.25)}
+.model-indicator{font-size:11px;color:#555;padding:3px 8px;background:var(--s2);border:1px solid var(--border);border-radius:20px;flex-shrink:0}
+
+/* TABS */
+.tabs{display:flex;gap:2px;background:var(--s2);border-bottom:1px solid var(--border);padding:8px 16px;flex-shrink:0}
+.tab{padding:6px 16px;border-radius:6px;font-size:13px;cursor:pointer;color:#666;transition:all 0.15s;border:none;background:transparent;font-family:inherit}
+.tab.on{background:rgba(124,92,252,0.2);color:var(--accent2)}
+.tab-panel{display:none;flex:1;overflow:hidden}
+.tab-panel.on{display:flex}
+
+/* WORKSPACE */
+.workspace{flex:1;display:grid;grid-template-columns:360px 1fr;overflow:hidden}
+.left{background:var(--s1);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.right{background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;overflow:auto}
+
+/* PROMPT */
+.prompt-area{padding:12px 14px;border-bottom:1px solid var(--border)}
+.prompt-area label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:#555;display:block;margin-bottom:6px}
+.prompt-wrap{position:relative}
+textarea#prompt{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;padding:10px;font-family:inherit;line-height:1.5;resize:none;height:88px}
+textarea#prompt:focus{outline:none;border-color:var(--accent)}
+textarea#prompt::placeholder{color:#333}
+
+/* AI BUTTON */
+.ai-row{display:flex;gap:6px;margin-top:8px}
+.ai-btn{flex:1;background:rgba(124,92,252,0.12);border:1px solid rgba(124,92,252,0.3);border-radius:7px;color:var(--accent2);font-size:12px;padding:7px;cursor:pointer;font-family:inherit;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:5px}
+.ai-btn:hover:not(:disabled){background:rgba(124,92,252,0.22);border-color:var(--accent)}
+.ai-btn:disabled{opacity:0.4;cursor:not-allowed}
+.ai-status{font-size:11px;color:#555;display:flex;align-items:center;gap:4px;padding:4px 0}
+.spinner{width:10px;height:10px;border:1.5px solid #333;border-top-color:var(--accent2);border-radius:50%;animation:spin 0.7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* EXAMPLES */
+.examples{padding:8px 14px;border-bottom:1px solid var(--border)}
+.examples p{font-size:10px;color:#444;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;font-weight:600}
+.ex-chips{display:flex;flex-wrap:wrap;gap:5px}
+.chip{background:var(--s2);border:1px solid var(--border);border-radius:5px;color:#666;font-size:11px;padding:4px 9px;cursor:pointer;transition:all 0.15s}
+.chip:hover{border-color:var(--accent2);color:var(--text)}
+
+/* OPTIONS */
+.options{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;flex-direction:column;gap:10px;overflow-y:auto;flex:1}
+.opt-row{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.opt{display:flex;flex-direction:column;gap:3px}
+.opt label{font-size:10px;color:#555;font-weight:500;text-transform:uppercase;letter-spacing:0.04em}
+.opt select,.opt input[type=text]{background:var(--s2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:12px;padding:6px 8px;font-family:inherit;width:100%}
+.opt select:focus,.opt input:focus{outline:none;border-color:var(--accent)}
+.opt input[type=color]{width:100%;height:30px;border:1px solid var(--border);border-radius:5px;cursor:pointer;background:var(--s2);padding:2px}
+.tipo-row{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.tipo-btn{background:var(--s2);border:1px solid var(--border);border-radius:5px;color:#666;font-size:12px;padding:7px;cursor:pointer;text-align:center;transition:all 0.15s;font-family:inherit}
+.tipo-btn.on{background:rgba(124,92,252,0.15);border-color:var(--accent);color:var(--accent2);font-weight:500}
+
+/* NAME INPUT */
+.name-row{display:flex;flex-direction:column;gap:3px}
+.name-row label{font-size:10px;color:#555;font-weight:500;text-transform:uppercase;letter-spacing:0.04em}
+.name-row input{background:var(--s2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:12px;padding:6px 8px;font-family:inherit;width:100%}
+.name-row input:focus{outline:none;border-color:var(--accent)}
+
+/* BOTTOM BUTTONS */
+.bottom-btns{padding:10px 14px;display:flex;gap:6px;flex-shrink:0;border-top:1px solid var(--border)}
+.gen-btn{flex:1;background:var(--accent);border:none;border-radius:8px;color:#fff;font-size:14px;font-weight:600;padding:11px;cursor:pointer;transition:background 0.15s;font-family:inherit}
+.gen-btn:hover{background:#6944e8}
+.gen-btn:active{transform:scale(0.98)}
+.save-btn{background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.3);border-radius:8px;color:var(--green);font-size:13px;padding:11px 14px;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.save-btn:hover{background:rgba(34,197,94,0.2)}
+.save-btn:disabled{opacity:0.3;cursor:not-allowed}
+
+/* RIGHT PANEL */
+.canvas-label{font-size:10px;color:#444;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px;font-weight:600}
+.canvases{display:flex;gap:16px;align-items:flex-start}
+.cv-wrap{display:flex;flex-direction:column;align-items:center;gap:7px}
+.cv-title{font-size:12px;color:#555;font-weight:500}
+canvas{border-radius:5px;image-rendering:pixelated;border:1px solid var(--border)}
+.dl-btn{background:var(--s2);border:1px solid var(--border);border-radius:5px;color:var(--text);font-size:11px;padding:5px 12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;transition:all 0.15s}
+.dl-btn:hover{border-color:var(--accent2);color:var(--accent2)}
+.empty-right{color:#2a2a32;font-size:13px;text-align:center;line-height:2}
+.empty-right .icon{font-size:44px;margin-bottom:8px}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px 16px;font-size:13px;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none}
+.toast.show{opacity:1}
+.toast.ok{border-color:rgba(34,197,94,0.5);color:var(--green)}
+.toast.err{border-color:rgba(239,68,68,0.5);color:var(--red)}
+
+/* GALLERY TAB */
+.gallery-panel{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.gallery-toolbar{padding:12px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;flex-shrink:0}
+.gallery-toolbar input{flex:1;background:var(--s2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;padding:7px 10px;font-family:inherit}
+.gallery-toolbar input:focus{outline:none;border-color:var(--accent)}
+.refresh-btn{background:var(--s2);border:1px solid var(--border);border-radius:6px;color:#666;font-size:12px;padding:7px 12px;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.refresh-btn:hover{color:var(--text);border-color:#444}
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;padding:16px;overflow-y:auto;flex:1}
+.gallery-card{background:var(--s1);border:1px solid var(--border);border-radius:8px;overflow:hidden;cursor:pointer;transition:all 0.15s}
+.gallery-card:hover{border-color:var(--accent2);transform:translateY(-1px)}
+.gallery-card canvas{width:100%;height:auto;display:block;image-rendering:pixelated}
+.gallery-card-info{padding:8px 10px}
+.gallery-card-info .gc-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gallery-card-info .gc-meta{font-size:10px;color:#444;margin-top:2px;display:flex;justify-content:space-between}
+.gallery-card-info .gc-tipo{font-size:10px;color:var(--accent2)}
+.gallery-empty{grid-column:1/-1;text-align:center;color:#333;padding:40px;font-size:13px}
+.del-btn{background:transparent;border:none;color:#333;cursor:pointer;font-size:12px;padding:2px 6px;border-radius:4px;transition:color 0.15s}
+.del-btn:hover{color:var(--red)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🎮</div>
+  <div>
+    <h1>Roblox Outfit Creator</h1>
+    <p>AI-powered con Ollama + SQLite</p>
+  </div>
+  <span class="model-indicator" id="model-ind">modelo: —</span>
+  <span class="hbadge" onclick="checkOllama()">⚡ Ollama</span>
+</header>
+
+<!-- TABS -->
+<div class="tabs">
+  <button class="tab on" onclick="switchTab('editor')">🎨 Editor</button>
+  <button class="tab" onclick="switchTab('gallery')">📦 Galería</button>
+</div>
+
+<!-- EDITOR TAB -->
+<div class="tab-panel on" id="tab-editor">
+  <div class="workspace">
+    <div class="left">
+      <div class="prompt-area">
+        <label>Describe tu outfit</label>
+        <div class="prompt-wrap">
+          <textarea id="prompt" placeholder="Ej: camisa de samurái negra con detalles dorados, dragón en el pecho..."></textarea>
+        </div>
+        <div class="ai-row">
+          <button class="ai-btn" id="ai-btn" onclick="askAI()">✨ Generar con IA</button>
+        </div>
+        <div class="ai-status" id="ai-status"></div>
+      </div>
+
+      <div class="examples">
+        <p>Ejemplos</p>
+        <div class="ex-chips">
+          <span class="chip" onclick="setPreset(this)">Samurái negro dorado</span>
+          <span class="chip" onclick="setPreset(this)">Militar camuflaje</span>
+          <span class="chip" onclick="setPreset(this)">Cyberpunk azul neón</span>
+          <span class="chip" onclick="setPreset(this)">Mago morado runas</span>
+          <span class="chip" onclick="setPreset(this)">Streetwear rojo</span>
+          <span class="chip" onclick="setPreset(this)">Pirata dorado</span>
+          <span class="chip" onclick="setPreset(this)">Ninja negro</span>
+          <span class="chip" onclick="setPreset(this)">Calaveras</span>
+        </div>
+      </div>
+
+      <div class="options">
+        <div>
+          <label style="font-size:10px;color:#555;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;display:block;margin-bottom:5px">Tipo de prenda</label>
+          <div class="tipo-row">
+            <button class="tipo-btn on" data-t="shirt" onclick="setTipo(this)">👕 Camisa</button>
+            <button class="tipo-btn" data-t="pants" onclick="setTipo(this)">👖 Pantalón</button>
+          </div>
+        </div>
+        <div class="opt-row">
+          <div class="opt"><label>Color principal</label><input type="color" id="c1" value="#1a1a1a"></div>
+          <div class="opt"><label>Color secundario</label><input type="color" id="c2" value="#c9a84c"></div>
+        </div>
+        <div class="opt-row">
+          <div class="opt"><label>Acento</label><input type="color" id="c3" value="#ffffff"></div>
+          <div class="opt">
+            <label>Patrón</label>
+            <select id="patron">
+              <option value="solid">Liso</option>
+              <option value="stripes">Rayas</option>
+              <option value="camo">Camuflaje</option>
+              <option value="checks">Cuadros</option>
+              <option value="geo">Geométrico</option>
+              <option value="scales">Escamas</option>
+              <option value="fire">Llamas</option>
+              <option value="circuit">Circuitos</option>
+              <option value="pixel">Pixelado</option>
+              <option value="grunge">Grunge</option>
+            </select>
+          </div>
+        </div>
+        <div class="opt-row">
+          <div class="opt">
+            <label>Logo</label>
+            <select id="logo">
+              <option value="">Ninguno</option>
+              <option value="dragon">Dragón</option>
+              <option value="skull">Cráneo</option>
+              <option value="star">Estrella</option>
+              <option value="lightning">Rayo</option>
+              <option value="cross">Cruz</option>
+              <option value="diamond">Diamante</option>
+              <option value="eye">Ojo</option>
+              <option value="sword">Espada</option>
+              <option value="shield">Escudo</option>
+              <option value="fire">Llama</option>
+              <option value="wings">Alas</option>
+              <option value="moon">Luna</option>
+            </select>
+          </div>
+          <div class="opt"><label>Texto</label><input type="text" id="texto" placeholder="RBLX, 99..."></div>
+        </div>
+        <div class="opt-row">
+          <div class="opt">
+            <label>Cuello</label>
+            <select id="cuello">
+              <option value="none">Sin detalle</option>
+              <option value="collar">Redondo</option>
+              <option value="v">En V</option>
+              <option value="hood">Capucha</option>
+              <option value="high">Alto</option>
+            </select>
+          </div>
+          <div class="opt">
+            <label>Borde</label>
+            <select id="borde">
+              <option value="none">Ninguno</option>
+              <option value="thin">Línea fina</option>
+              <option value="thick">Grueso</option>
+              <option value="dashed">Puntillado</option>
+              <option value="glow">Brillo</option>
+            </select>
+          </div>
+        </div>
+        <div class="name-row">
+          <label>Nombre del outfit</label>
+          <input type="text" id="outfit-name" placeholder="Mi outfit épico...">
+        </div>
+      </div>
+
+      <div class="bottom-btns">
+        <button class="gen-btn" onclick="generar()">✦ Crear plantilla</button>
+        <button class="save-btn" id="save-btn" onclick="saveOutfit()" disabled title="Genera primero una plantilla">💾</button>
+      </div>
+    </div>
+
+    <div class="right" id="right">
+      <div class="empty-right" id="empty">
+        <div class="icon">🎨</div>
+        Describe tu outfit y presiona<br><strong>Crear plantilla</strong><br>
+        <span style="color:#333;font-size:12px">o usa ✨ Generar con IA</span>
+      </div>
+      <div id="results" style="display:none;flex-direction:column;align-items:center;gap:14px">
+        <div class="canvas-label" id="result-label">Plantilla generada</div>
+        <div class="canvases" id="canvases-area"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GALLERY TAB -->
+<div class="tab-panel" id="tab-gallery">
+  <div class="gallery-panel">
+    <div class="gallery-toolbar">
+      <input type="text" id="gallery-search" placeholder="Buscar outfits..." oninput="filterGallery()">
+      <button class="refresh-btn" onclick="loadGallery()">↻ Actualizar</button>
+    </div>
+    <div class="gallery-grid" id="gallery-grid">
+      <div class="gallery-empty">Cargando galería...</div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ───────────────────────────────────────────────
+const W=585, H=559;
+let tipoActual='shirt';
+let lastCanvas=null;
+let galleryData=[];
+
+const SHIRT={torso_top:[202,0,128,64],torso_r:[74,64,64,128],torso_front:[202,64,128,128],torso_l:[330,64,64,128],torso_back:[394,64,128,128],torso_bot:[202,192,128,64],ra_top:[138,256,64,64],la_top:[330,256,64,64],ra_l:[74,320,64,128],ra_b:[138,320,64,128],ra_r:[202,320,64,128],ra_f:[266,320,64,128],la_f:[330,320,64,128],la_l:[394,320,64,128],la_b:[458,320,64,128],la_r:[522,320,64,128],ra_bot:[138,448,64,64],la_bot:[330,448,64,64]};
+const PANTS={torso_top:[202,0,128,64],torso_r:[74,64,64,128],torso_front:[202,64,128,128],torso_l:[330,64,64,128],torso_back:[394,64,128,128],torso_bot:[202,192,128,64],rl_top:[138,256,64,64],ll_top:[330,256,64,64],rl_l:[74,320,64,128],rl_b:[138,320,64,128],rl_r:[202,320,64,128],rl_f:[266,320,64,128],ll_f:[330,320,64,128],ll_l:[394,320,64,128],ll_b:[458,320,64,128],ll_r:[522,320,64,128],rl_bot:[138,448,64,64],ll_bot:[330,448,64,64]};
+
+const PRESETS={
+  'Samurái negro dorado':{c1:'#111111',c2:'#c9a84c',c3:'#ffffff',patron:'scales',logo:'dragon',texto:'',cuello:'high',borde:'thin'},
+  'Militar camuflaje':{c1:'#3a4a2a',c2:'#5a6a3a',c3:'#2a3a1a',patron:'camo',logo:'',texto:'',cuello:'none',borde:'none'},
+  'Cyberpunk azul neón':{c1:'#050510',c2:'#00f0ff',c3:'#7700ff',patron:'circuit',logo:'lightning',texto:'',cuello:'none',borde:'glow'},
+  'Mago morado runas':{c1:'#1a0a2e',c2:'#9b59b6',c3:'#e8c46a',patron:'geo',logo:'moon',texto:'',cuello:'hood',borde:'thin'},
+  'Streetwear rojo':{c1:'#111111',c2:'#cc0000',c3:'#ffffff',patron:'solid',logo:'star',texto:'99',cuello:'collar',borde:'thick'},
+  'Pirata dorado':{c1:'#3d2208',c2:'#c9a84c',c3:'#111111',patron:'solid',logo:'skull',texto:'',cuello:'none',borde:'none'},
+  'Ninja negro':{c1:'#0a0a0a',c2:'#1a1a1a',c3:'#cc0000',patron:'solid',logo:'eye',texto:'',cuello:'high',borde:'thin'},
+  'Calaveras':{c1:'#111111',c2:'#ffffff',c3:'#888888',patron:'grunge',logo:'skull',texto:'',cuello:'none',borde:'none'},
+};
+
+// ── OLLAMA CHECK ─────────────────────────────────────────
+async function checkOllama(){
+  try{
+    const r=await fetch('/api/models');
+    const d=await r.json();
+    if(d.models&&d.models.length>0){
+      const m=d.models[0];
+      document.getElementById('model-ind').textContent='modelo: '+m.split(':')[0];
+      toast('✅ Ollama conectado — '+d.models.length+' modelos','ok');
+    } else {
+      toast('⚠️ Ollama sin modelos. Ejecuta: ollama pull mistral','err');
+    }
+  }catch{
+    toast('❌ Ollama no disponible','err');
+  }
+}
+
+// ── AI SUGGEST ───────────────────────────────────────────
+async function askAI(){
+  const prompt=document.getElementById('prompt').value.trim();
+  if(!prompt){toast('Escribe una descripción primero','err');return;}
+  const btn=document.getElementById('ai-btn');
+  const status=document.getElementById('ai-status');
+  btn.disabled=true;
+  status.innerHTML='<div class="spinner"></div> Consultando IA...';
+  try{
+    const r=await fetch('/api/ai-suggest',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error||'Error desconocido');
+    const s=d.settings;
+    if(s.c1) document.getElementById('c1').value=s.c1;
+    if(s.c2) document.getElementById('c2').value=s.c2;
+    if(s.c3) document.getElementById('c3').value=s.c3;
+    if(s.patron) document.getElementById('patron').value=s.patron;
+    if(s.logo!==undefined) document.getElementById('logo').value=s.logo;
+    if(s.texto!==undefined) document.getElementById('texto').value=s.texto;
+    if(s.cuello) document.getElementById('cuello').value=s.cuello;
+    if(s.borde) document.getElementById('borde').value=s.borde;
+    if(s.nombre) document.getElementById('outfit-name').value=s.nombre;
+    status.innerHTML='<span style="color:#22c55e">✓ IA configuró tu outfit</span>';
+    toast('✨ IA lista — presiona Crear plantilla','ok');
+    setTimeout(()=>generar(),400);
+  }catch(e){
+    status.innerHTML='<span style="color:#ef4444">✗ '+e.message+'</span>';
+    toast(e.message,'err');
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+// ── PRESETS ──────────────────────────────────────────────
+function setPreset(el){
+  const name=el.textContent;
+  document.getElementById('prompt').value=name;
+  const p=PRESETS[name];
+  if(!p) return;
+  document.getElementById('c1').value=p.c1;
+  document.getElementById('c2').value=p.c2;
+  document.getElementById('c3').value=p.c3;
+  document.getElementById('patron').value=p.patron;
+  document.getElementById('logo').value=p.logo;
+  document.getElementById('texto').value=p.texto;
+  document.getElementById('cuello').value=p.cuello;
+  document.getElementById('borde').value=p.borde;
+  document.getElementById('outfit-name').value=name;
+}
+
+function setTipo(el){
+  document.querySelectorAll('.tipo-btn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  tipoActual=el.dataset.t;
+}
+
+// ── DRAWING ──────────────────────────────────────────────
+function mulberry(seed){let s=seed>>>0;return function(){s+=0x6D2B79F5;let t=s;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296;};}
+
+function fillPattern(ctx,x,y,w,h,patron,c1,c2,c3){
+  ctx.save();ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
+  if(patron==='solid'){ctx.fillStyle=c1;ctx.fillRect(x,y,w,h);}
+  else if(patron==='stripes'){ctx.fillStyle=c1;ctx.fillRect(x,y,w,h);ctx.fillStyle=c2;for(let i=x;i<x+w;i+=16)ctx.fillRect(i,y,8,h);}
+  else if(patron==='camo'){ctx.fillStyle=c1;ctx.fillRect(x,y,w,h);const cols=[c1,c2,c3,'#2a3a1a','#4a5a2a'];const rng=mulberry(x*37+y);for(let i=0;i<40;i++){ctx.fillStyle=cols[Math.floor(rng()*cols.length)];ctx.beginPath();const bx=x+rng()*w,by=y+rng()*h;ctx.ellipse(bx,by,rng()*30+8,rng()*18+5,rng()*Math.PI,0,Math.PI*2);ctx.fill();}}
+  else if(patron==='checks'){const s=16;for(let cx=x;cx<x+w;cx+=s)for(let cy=y;cy<y+h;cy+=s){ctx.fillStyle=(Math.floor((cx-x)/s)+Math.floor((cy-y)/s))%2===0?c1:c2;ctx.fillRect(cx,cy,s,s);}}
+  else if(patron==='geo'){ctx.fillStyle=c1;ctx.fillRect(x,y,w,h);ctx.strokeStyle=c2;ctx.lineWidth=1.5;for(let cx=x;cx<x+w;cx+=24)for(let cy=y;cy<y+h;cy+=24){ctx.beginPath();ctx.moveTo(cx+12,cy);ctx.lineTo(cx+24,cy+12);ctx.lineTo(cx+12,cy+24);ctx.lineTo(cx,cy+12);ctx.closePath();ctx.stroke();}}
+  else if(patron==='scales'){ctx.fillStyle=c1;ctx.fillRect(x,y,w,h);ctx.strokeStyle=c2;ctx.lineWidth=1;const sw=20,sh=12;for(let row=0;row<Math.ceil(h/sh)+1;row++){const off=row%2===0?0:sw/2;for(let col=-1;col<Math.ceil(w/sw)+1;col++){const sx=x+col*sw+off,sy=y+row*sh;ctx.beginPath();ctx.arc(sx+sw/2,sy+sh,sw/2,Math.PI,0);ctx.stroke();}}}
+  else if(patron==='fire'){ctx.fillStyle='#111';ctx.fillRect(x,y,w,h);const rng=mulberry(x+y);for(let i=0;i<60;i++){const fx=x+rng()*w,fh=rng()*h*0.7+20;const grad=ctx.createLinearGradient(fx,y+h,fx,y+h-fh);grad.addColorStop(0,'#ff4500');grad.addColorStop(0.5,'#ff6b00');grad.addColorStop(1,'rgba(255,200,0,0)');ctx.fillStyle=grad;ctx.beginPath();ctx.ellipse(fx,y+h-fh/2,rng()*10+3,fh/2,0,0,Math.PI*2);ctx.fill();}}
+  else if(patron==='circuit'){ctx.fillStyle='#050510';ctx.fillRect(x,y,w,h);ctx.strokeStyle=c2;ctx.lineWidth=1.2;const rng=mulberry(x*7+y);for(let i=0;i<20;i++){let cx=x+Math.floor(rng()*(w/16))*16,cy=y+Math.floor(rng()*(h/16))*16;ctx.beginPath();ctx.moveTo(cx,cy);for(let j=0;j<8;j++){const dir=Math.floor(rng()*4),step=16*(Math.floor(rng()*3)+1);if(dir===0)cx+=step;else if(dir===1)cx-=step;else if(dir===2)cy+=step;else cy-=step;cx=Math.max(x,Math.min(x+w,cx));cy=Math.max(y,Math.min(y+h,cy));ctx.lineTo(cx,cy);}ctx.stroke();ctx.fillStyle=c2;ctx.beginPath();ctx.arc(cx,cy,2.5,0,Math.PI*2);ctx.fill();}}
+  else if(patron==='pixel'){const ps=12;const cols=[c1,c1,c1,c2,c3];const rng=mulberry(x+y*3);for(let px=x;px<x+w;px+=ps)for(let py=y;py<y+h;py+=ps){ctx.fillStyle=cols[Math.floor(rng()*cols.length)];ctx.fillRect(px,py,ps,ps);}}
+  else if(patron==='grunge'){ctx.fillStyle=c1;ctx.fillRect(x,y,w,h);const rng=mulberry(x*11+y);for(let i=0;i<300;i++){ctx.fillStyle=`rgba(${rng()>0.5?255:0},${rng()>0.5?255:0},${rng()>0.5?255:0},${rng()*0.15})`;ctx.fillRect(x+rng()*w,y+rng()*h,rng()*6+1,rng()*3+1);}}
+  ctx.restore();
+}
+
+function drawLogo(ctx,type,cx,cy,size,col){
+  ctx.fillStyle=col;ctx.strokeStyle=col;ctx.lineWidth=2;const s=size/2;
+  if(type==='star'){ctx.beginPath();for(let i=0;i<5;i++){const a=i*Math.PI*2/5-Math.PI/2,b=a+Math.PI/5;i===0?ctx.moveTo(cx+s*Math.cos(a),cy+s*Math.sin(a)):ctx.lineTo(cx+s*Math.cos(a),cy+s*Math.sin(a));ctx.lineTo(cx+s*0.4*Math.cos(b),cy+s*0.4*Math.sin(b));}ctx.closePath();ctx.fill();}
+  else if(type==='skull'){ctx.beginPath();ctx.arc(cx,cy-s*0.1,s*0.7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#000';ctx.beginPath();ctx.arc(cx-s*0.25,cy-s*0.15,s*0.2,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(cx+s*0.25,cy-s*0.15,s*0.2,0,Math.PI*2);ctx.fill();ctx.fillStyle=col;ctx.fillRect(cx-s*0.35,cy+s*0.35,s*0.7,s*0.4);ctx.fillStyle='#000';ctx.fillRect(cx-s*0.25,cy+s*0.38,s*0.12,s*0.3);ctx.fillRect(cx-s*0.06,cy+s*0.38,s*0.12,s*0.3);ctx.fillRect(cx+s*0.13,cy+s*0.38,s*0.12,s*0.3);}
+  else if(type==='lightning'){ctx.beginPath();ctx.moveTo(cx+s*0.2,cy-s);ctx.lineTo(cx-s*0.1,cy);ctx.lineTo(cx+s*0.15,cy);ctx.lineTo(cx-s*0.2,cy+s);ctx.lineTo(cx+s*0.1,cy);ctx.lineTo(cx-s*0.15,cy);ctx.closePath();ctx.fill();}
+  else if(type==='cross'){const t=s*0.3;ctx.fillRect(cx-t,cy-s,t*2,s*2);ctx.fillRect(cx-s,cy-t,s*2,t*2);}
+  else if(type==='diamond'){ctx.beginPath();ctx.moveTo(cx,cy-s);ctx.lineTo(cx+s*0.7,cy);ctx.lineTo(cx,cy+s);ctx.lineTo(cx-s*0.7,cy);ctx.closePath();ctx.fill();}
+  else if(type==='eye'){ctx.beginPath();ctx.ellipse(cx,cy,s,s*0.55,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#000';ctx.beginPath();ctx.arc(cx,cy,s*0.35,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(cx+s*0.1,cy-s*0.1,s*0.12,0,Math.PI*2);ctx.fill();}
+  else if(type==='dragon'){ctx.font=`bold ${size*0.9}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🐉',cx,cy);}
+  else if(type==='sword'){ctx.lineWidth=s*0.2;ctx.beginPath();ctx.moveTo(cx,cy-s);ctx.lineTo(cx,cy+s*0.5);ctx.stroke();ctx.lineWidth=s*0.15;ctx.beginPath();ctx.moveTo(cx-s*0.5,cy+s*0.1);ctx.lineTo(cx+s*0.5,cy+s*0.1);ctx.stroke();ctx.fillStyle=col;ctx.fillRect(cx-s*0.2,cy+s*0.4,s*0.4,s*0.5);}
+  else if(type==='shield'){ctx.beginPath();ctx.moveTo(cx,cy+s);ctx.lineTo(cx-s*0.7,cy-s*0.2);ctx.lineTo(cx-s*0.7,cy-s);ctx.lineTo(cx+s*0.7,cy-s);ctx.lineTo(cx+s*0.7,cy-s*0.2);ctx.closePath();ctx.fill();}
+  else if(type==='fire'){ctx.font=`${size*1.1}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🔥',cx,cy);}
+  else if(type==='wings'){ctx.beginPath();ctx.moveTo(cx,cy);ctx.bezierCurveTo(cx-s,cy-s,cx-s*1.5,cy+s*0.5,cx-s*0.5,cy+s*0.2);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(cx,cy);ctx.bezierCurveTo(cx+s,cy-s,cx+s*1.5,cy+s*0.5,cx+s*0.5,cy+s*0.2);ctx.closePath();ctx.fill();}
+  else if(type==='moon'){ctx.beginPath();ctx.arc(cx,cy,s,0,Math.PI*2);ctx.fill();ctx.fillStyle='#000';ctx.beginPath();ctx.arc(cx+s*0.3,cy-s*0.1,s*0.75,0,Math.PI*2);ctx.fill();}
+}
+
+function drawBorde(ctx,regions,borde,c2,c3){
+  if(borde==='none')return;
+  Object.values(regions).forEach(([x,y,w,h])=>{
+    ctx.save();
+    if(borde==='thin'){ctx.strokeStyle=c2;ctx.lineWidth=2;}
+    else if(borde==='thick'){ctx.strokeStyle=c2;ctx.lineWidth=5;}
+    else if(borde==='dashed'){ctx.strokeStyle=c3;ctx.lineWidth=2;ctx.setLineDash([4,3]);}
+    else if(borde==='glow'){ctx.strokeStyle=c2;ctx.lineWidth=3;}
+    ctx.strokeRect(x+1,y+1,w-2,h-2);ctx.restore();
+  });
+}
+
+function drawCuello(ctx,tipo,cuello,regions,c1,c2){
+  if(cuello==='none')return;
+  const front=regions.torso_front;if(!front)return;
+  const[x,y,w,h]=front;const cx=x+w/2;
+  ctx.strokeStyle=c2;ctx.lineWidth=3;
+  if(cuello==='collar'){ctx.beginPath();ctx.arc(cx,y,18,0,Math.PI);ctx.stroke();}
+  else if(cuello==='v'){ctx.beginPath();ctx.moveTo(cx-16,y);ctx.lineTo(cx,y+22);ctx.lineTo(cx+16,y);ctx.stroke();}
+  else if(cuello==='high'){ctx.fillStyle=c2;ctx.fillRect(x+8,y,w-16,20);}
+  else if(cuello==='hood'){ctx.fillStyle=c2+'88';ctx.fillRect(x-10,y-20,w+20,30);ctx.strokeStyle=c2;ctx.lineWidth=2;ctx.strokeRect(x-10,y-20,w+20,30);}
+}
+
+function drawTemplate(canvas,tipo,c1,c2,c3,patron,logoType,texto,cuello,borde){
+  const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#888888';ctx.fillRect(0,0,W,H);
+  const regions=tipo==='shirt'?SHIRT:PANTS;
+  Object.entries(regions).forEach(([name,[x,y,w,h]])=>{
+    const darker=name.includes('back')||name.includes('_b');
+    const cc1=darker?darken(c1,0.8):c1;
+    fillPattern(ctx,x,y,w,h,patron,cc1,c2,c3);
+  });
+  drawBorde(ctx,regions,borde,c2,c3);
+  drawCuello(ctx,tipo,cuello,regions,c1,c2);
+  if(logoType){const[fx,fy,fw,fh]=regions.torso_front;drawLogo(ctx,logoType,fx+fw/2,fy+fh/2,Math.min(fw,fh)*0.55,c3);}
+  if(texto){const[bx,by,bw,bh]=regions.torso_back;ctx.fillStyle=c3;ctx.font=`bold ${Math.min(bw*0.4,28)}px 'Segoe UI',sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(texto.toUpperCase(),bx+bw/2,by+bh/2);}
+  ctx.strokeStyle='rgba(0,0,0,0.25)';ctx.lineWidth=1;
+  Object.values(regions).forEach(([x,y,w,h])=>ctx.strokeRect(x,y,w,h));
+}
+
+function darken(hex,factor){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return `rgb(${Math.round(r*factor)},${Math.round(g*factor)},${Math.round(b*factor)})`;}
+
+// ── GENERAR ──────────────────────────────────────────────
+function getSettings(){
+  return{
+    c1:document.getElementById('c1').value,
+    c2:document.getElementById('c2').value,
+    c3:document.getElementById('c3').value,
+    patron:document.getElementById('patron').value,
+    logo:document.getElementById('logo').value,
+    texto:document.getElementById('texto').value.trim(),
+    cuello:document.getElementById('cuello').value,
+    borde:document.getElementById('borde').value,
+  };
+}
+
+function generar(){
+  const s=getSettings();
+  document.getElementById('empty').style.display='none';
+  const results=document.getElementById('results');
+  results.style.display='flex';
+  document.getElementById('result-label').textContent=tipoActual==='shirt'?'Plantilla camisa':'Plantilla pantalón';
+  const area=document.getElementById('canvases-area');
+  area.innerHTML='';
+  const scale=0.62;
+  const cv=document.createElement('canvas');
+  cv.width=W;cv.height=H;
+  cv.style.width=W*scale+'px';cv.style.height=H*scale+'px';
+  drawTemplate(cv,tipoActual,s.c1,s.c2,s.c3,s.patron,s.logo,s.texto,s.cuello,s.borde);
+  lastCanvas=cv;
+  const wrap=document.createElement('div');
+  wrap.className='cv-wrap';
+  const lbl=document.createElement('div');
+  lbl.className='cv-title';
+  lbl.textContent=tipoActual==='shirt'?'👕 Camisa':'👖 Pantalón';
+  const dl=document.createElement('button');
+  dl.className='dl-btn';
+  dl.innerHTML='⬇ Descargar PNG';
+  dl.onclick=()=>download(cv,tipoActual==='shirt'?'roblox-shirt.png':'roblox-pants.png');
+  wrap.appendChild(lbl);wrap.appendChild(cv);wrap.appendChild(dl);
+  area.appendChild(wrap);
+  document.getElementById('save-btn').disabled=false;
+}
+
+function download(canvas,name){
+  const a=document.createElement('a');
+  a.download=name;a.href=canvas.toDataURL('image/png');a.click();
+}
+
+// ── SAVE ─────────────────────────────────────────────────
+async function saveOutfit(){
+  const name=document.getElementById('outfit-name').value.trim()||'Outfit sin nombre';
+  const prompt=document.getElementById('prompt').value.trim();
+  const settings=getSettings();
+  try{
+    const r=await fetch('/api/outfits',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,prompt,settings,tipo:tipoActual})});
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error);
+    toast('💾 "'+name+'" guardado','ok');
+  }catch(e){
+    toast('Error: '+e.message,'err');
+  }
+}
+
+// ── GALLERY ──────────────────────────────────────────────
+async function loadGallery(){
+  const grid=document.getElementById('gallery-grid');
+  try{
+    const r=await fetch('/api/outfits');
+    galleryData=await r.json();
+    renderGallery(galleryData);
+  }catch{
+    grid.innerHTML='<div class="gallery-empty">Error cargando galería</div>';
+  }
+}
+
+function renderGallery(items){
+  const grid=document.getElementById('gallery-grid');
+  if(!items.length){grid.innerHTML='<div class="gallery-empty">No hay outfits guardados aún.<br>Crea uno y presiona 💾</div>';return;}
+  grid.innerHTML='';
+  items.forEach(item=>{
+    const card=document.createElement('div');
+    card.className='gallery-card';
+    const cv=document.createElement('canvas');
+    cv.width=W;cv.height=H;
+    cv.style.width='100%';cv.style.height='auto';
+    const s=item.settings;
+    drawTemplate(cv,item.tipo,s.c1,s.c2,s.c3,s.patron,s.logo,s.texto,s.cuello,s.borde);
+    const date=new Date(item.created_at).toLocaleDateString('es-MX',{day:'numeric',month:'short'});
+    const info=document.createElement('div');
+    info.className='gallery-card-info';
+    info.innerHTML=`<div class="gc-name">${item.name}</div><div class="gc-meta"><span class="gc-tipo">${item.tipo==='shirt'?'👕':'👖'}</span><span>${date}</span><button class="del-btn" onclick="deleteOutfit(${item.id},event)">✕</button></div>`;
+    card.onclick=()=>loadFromGallery(item);
+    card.appendChild(cv);card.appendChild(info);
+    grid.appendChild(card);
+  });
+}
+
+function filterGallery(){
+  const q=document.getElementById('gallery-search').value.toLowerCase();
+  renderGallery(q?galleryData.filter(i=>i.name.toLowerCase().includes(q)||i.prompt.toLowerCase().includes(q)):galleryData);
+}
+
+async function deleteOutfit(id,e){
+  e.stopPropagation();
+  if(!confirm('¿Eliminar este outfit?'))return;
+  await fetch('/api/outfits/'+id,{method:'DELETE'});
+  loadGallery();
+  toast('Eliminado','ok');
+}
+
+function loadFromGallery(item){
+  switchTab('editor');
+  const s=item.settings;
+  document.getElementById('c1').value=s.c1||'#1a1a1a';
+  document.getElementById('c2').value=s.c2||'#c9a84c';
+  document.getElementById('c3').value=s.c3||'#ffffff';
+  document.getElementById('patron').value=s.patron||'solid';
+  document.getElementById('logo').value=s.logo||'';
+  document.getElementById('texto').value=s.texto||'';
+  document.getElementById('cuello').value=s.cuello||'none';
+  document.getElementById('borde').value=s.borde||'none';
+  document.getElementById('outfit-name').value=item.name;
+  document.getElementById('prompt').value=item.prompt||'';
+  tipoActual=item.tipo;
+  document.querySelectorAll('.tipo-btn').forEach(b=>b.classList.toggle('on',b.dataset.t===tipoActual));
+  generar();
+}
+
+// ── TABS ─────────────────────────────────────────────────
+function switchTab(name){
+  document.querySelectorAll('.tab').forEach((t,i)=>{
+    const n=['editor','gallery'][i];
+    t.classList.toggle('on',n===name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p=>{
+    p.classList.toggle('on',p.id==='tab-'+name);
+  });
+  if(name==='gallery') loadGallery();
+}
+
+// ── TOAST ────────────────────────────────────────────────
+function toast(msg,type='ok'){
+  const el=document.getElementById('toast');
+  el.textContent=msg;
+  el.className='toast show '+(type==='ok'?'ok':'err');
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>el.classList.remove('show'),3000);
+}
+
+// ── INIT ─────────────────────────────────────────────────
+checkOllama();
+</script>
+</body>
+</html>
